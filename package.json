@@ -13,7 +13,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "run": "node dist/index.js"
+    "server": "node dist/index.js"
   },
   "scriptsComments": {
     "build": "Just use 'yarn run build'"
