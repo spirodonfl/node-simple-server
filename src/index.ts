@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as url from 'url';
 import { URLSearchParams } from 'url';
 
-export default class SimpleServer {
+export class SimpleServer {
     public server: http.Server;
     private port: number;
     private rootFolder: string;
