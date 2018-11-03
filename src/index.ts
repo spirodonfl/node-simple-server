@@ -40,6 +40,7 @@ export class SimpleServer {
     private onRequest = (request: http.IncomingMessage, response: http.ServerResponse) => {
         const requestUrl = url.parse(request.url || '');
         const reqResource = requestUrl.pathname;
+        console.log(request.url, reqResource);
         const reqQuery = requestUrl.query;
 
         let foundRoute = false;
