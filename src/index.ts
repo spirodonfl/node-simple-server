@@ -1,4 +1,5 @@
 import * as console from 'console';
+import * as Events from 'events';
 import * as fs from 'fs';
 import * as http from 'http';
 import * as path from 'path';
@@ -13,10 +14,12 @@ interface IRouteArray {
 interface IRoute {
     method: string;
     path: string;
+    callback: (request: http.IncomingMessage, response: http.ServerResponse) => void;
 }
 
 export class SimpleServer {
     public server: http.Server;
+    public events: Events.EventEmitter;
 
     private port: number;
     private rootFolder: string;
@@ -26,11 +29,16 @@ export class SimpleServer {
         this.port = port;
         this.rootFolder = rootFolder;
         this.routes = [];
+        this.events = new Events.EventEmitter();
         this.server = http.createServer(this.onRequest);
     }
 
-    public addRoute(requestMethod: string, requestPath: string) {
-        this.routes.push({method: requestMethod, path: requestPath});
+    public addRoute(requestMethod: string, requestPath: string, requestCallback: (request: http.IncomingMessage, response: http.ServerResponse) => void) {
+        this.routes.push({method: requestMethod, path: requestPath, callback: requestCallback});
+    }
+
+    public getRoutes() {
+        return this.routes;
     }
 
     public startServer() {
@@ -39,27 +47,33 @@ export class SimpleServer {
 
     private onRequest = (request: http.IncomingMessage, response: http.ServerResponse) => {
         const requestUrl = url.parse(request.url || '');
-        const reqResource = requestUrl.pathname;
-        console.log(request.url, reqResource);
-        const reqQuery = requestUrl.query;
+        const requestResource = requestUrl.pathname;
+        const requestQuery = requestUrl.query;
 
         let foundRoute = false;
+        let route:IRoute|boolean = false;
         for (let r = 0; r < this.routes.length; ++r) {
             const thisRoute = this.routes[r];
-            if (thisRoute.method === request.method && thisRoute.path === request.url) {
+            if (thisRoute.method === request.method && thisRoute.path === requestResource) {
+                route = thisRoute;
                 foundRoute = true;
                 break;
             }
         }
 
-        if (!foundRoute) {
+        if (foundRoute && route) {
+            // Execute callback
+            route.callback(request, response);
+            // Emit event in case we are using events
+            this.events.emit('Route', request, response);
+        } else {
             // Default route
             if (request.method === 'GET') {
-                let filePath = request.url;
+                let filePath = requestResource;
                 if (filePath === '/') {
                     filePath = this.rootFolder + '/index.html';
                 } else {
-                    filePath = this.rootFolder + request.url;
+                    filePath = this.rootFolder + requestResource;
                 }
 
                 const extName = String(path.extname(filePath)).toLowerCase();

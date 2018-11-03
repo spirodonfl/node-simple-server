@@ -11,7 +11,8 @@
             "single"
         ],
         "no-console": false,
-        "prefer-for-of": false
+        "prefer-for-of": false,
+        "max-line-length": 140
     },
     "rulesDirectory": []
 }
