@@ -20,6 +20,7 @@ interface IRoute {
 export class SimpleServer {
     public server: http.Server;
     public events: Events.EventEmitter;
+    public mimeTypes: object;
 
     private port: number;
     private rootFolder: string;
@@ -29,6 +30,22 @@ export class SimpleServer {
         this.port = port;
         this.rootFolder = rootFolder;
         this.routes = [];
+        this.mimeTypes = {
+            '.css': 'text/css',
+            '.eot': 'application/vnd.ms-fontobject',
+            '.gif': 'image/gif',
+            '.html': 'text/html',
+            '.jpg': 'image/jpg',
+            '.js': 'text/javascript',
+            '.json': 'application/json',
+            '.mp4': 'video/mp4',
+            '.otf': 'application/font-otf',
+            '.png': 'image/png',
+            '.svg': 'application/image/svg+xml',
+            '.ttf': 'application/font-ttf',
+            '.wav': 'audio/wav',
+            '.woff': 'application/font-woff',
+        };
         this.events = new Events.EventEmitter();
         this.server = http.createServer(this.onRequest);
     }
@@ -77,24 +94,8 @@ export class SimpleServer {
                 }
 
                 const extName = String(path.extname(filePath)).toLowerCase();
-                const mimeTypes = {
-                    '.css': 'text/css',
-                    '.eot': 'application/vnd.ms-fontobject',
-                    '.gif': 'image/gif',
-                    '.html': 'text/html',
-                    '.jpg': 'image/jpg',
-                    '.js': 'text/javascript',
-                    '.json': 'application/json',
-                    '.mp4': 'video/mp4',
-                    '.otf': 'application/font-otf',
-                    '.png': 'image/png',
-                    '.svg': 'application/image/svg+xml',
-                    '.ttf': 'application/font-ttf',
-                    '.wav': 'audio/wav',
-                    '.woff': 'application/font-woff',
-                };
 
-                const contentType = mimeTypes[extName] || 'application/octet-stream';
+                const contentType = this.mimeTypes[extName] || 'application/octet-stream';
 
                 fs.readFile(filePath, (error, content) => {
                     if (error) {
