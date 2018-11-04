@@ -59,7 +59,9 @@ export class SimpleServer {
     }
 
     public startServer() {
-        this.server.listen(this.port);
+        this.server.listen(this.port, () => {
+            this.events.emit('Server Is Listening');
+        });
     }
 
     private onRequest = (request: http.IncomingMessage, response: http.ServerResponse) => {
